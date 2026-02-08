@@ -1,0 +1,6 @@
+Checking 'assets' table schema...
+Columns: id, name, serial_number, category_id, location_id, assigned_to_user_id, purchase_date, warranty_expiry, status, notes, created_at, updated_at, category
+Has 'category' column: YES
+Has 'category_id' column: YES
+Migration Status:
+Found migration record: 2026_02_08_074149_modify_assets_category_column (Batch: 7)
