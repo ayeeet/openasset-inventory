@@ -1,59 +1,300 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Laravel 12 Production Deployment Guide
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This document explains how to deploy this Laravel 12.50 application using:
 
-## About Laravel
+- PHP 8.4
+- Node 24.12
+- Docker & Docker Compose
+- Amazon Linux 2023 (EC2)
+- Nginx Reverse Proxy
+- Let's Encrypt SSL
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# 🧱 Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Laravel 12.50
+- PHP 8.4
+- Node 24.12 (Vite)
+- MySQL 8
+- Docker
+- Nginx
+- AWS EC2 (Amazon Linux 2023)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# 🖥️ Server Requirements
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Amazon Linux 2023
+- Docker installed
+- Docker Compose plugin installed
+- Nginx installed
+- Git installed
+- Domain pointed to EC2 public IP
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 🔧 1. Initial Server Setup (Amazon Linux 2023)
 
-### Premium Partners
+Update system:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+sudo dnf update -y
+```
 
-## Contributing
+Install Docker:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+sudo dnf install docker -y
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+```
 
-## Code of Conduct
+Log out and back in after adding Docker group.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Install Docker Compose plugin:
 
-## Security Vulnerabilities
+```bash
+sudo dnf install docker-compose-plugin -y
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Install Nginx:
 
-## License
+```bash
+sudo dnf install nginx -y
+sudo systemctl enable nginx
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+# 📥 2. Clone Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+cd YOUR_REPO
+```
+
+---
+
+# ⚙️ 3. Configure Environment
+
+Copy environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```
+APP_NAME=LaravelApp
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_user
+DB_PASSWORD=your_password
+```
+
+---
+
+# 🐳 4. Docker Production Build
+
+Build containers:
+
+```bash
+docker compose -f docker-compose.prod.yml build
+```
+
+Start containers:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Check running containers:
+
+```bash
+docker ps
+```
+
+---
+
+# 🗄️ 5. Run Migrations
+
+```bash
+docker compose exec app php artisan migrate --force
+```
+
+(Optional seed)
+
+```bash
+docker compose exec app php artisan db:seed --force
+```
+
+---
+
+# 🎨 6. Frontend Build (Node 24.12)
+
+This project uses Vite.
+
+If building locally:
+
+```bash
+nvm install 24
+nvm use 24
+npm install
+npm run build
+```
+
+If using Docker multi-stage build, Node 24 is used inside container.
+
+---
+
+# 📂 7. Storage Setup
+
+Run:
+
+```bash
+docker compose exec app php artisan storage:link
+```
+
+Ensure correct permissions:
+
+```bash
+sudo chmod -R 775 storage
+sudo chmod -R 775 bootstrap/cache
+```
+
+---
+
+# 🌐 8. Nginx Reverse Proxy Configuration
+
+Create config:
+
+```bash
+sudo nano /etc/nginx/conf.d/app.conf
+```
+
+Example configuration:
+
+```
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+Test Nginx:
+
+```bash
+sudo nginx -t
+```
+
+Restart:
+
+```bash
+sudo systemctl restart nginx
+```
+
+---
+
+# 🔒 9. Enable SSL (Let's Encrypt)
+
+Install Certbot:
+
+```bash
+sudo dnf install certbot python3-certbot-nginx -y
+```
+
+Generate certificate:
+
+```bash
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+Test renewal:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+---
+
+# 🔄 Deployment Workflow (After Code Updates)
+
+```bash
+git pull origin main
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+docker compose exec app php artisan migrate --force
+docker compose exec app php artisan optimize
+```
+
+---
+
+# 🛠️ Useful Commands
+
+View logs:
+
+```bash
+docker compose logs -f
+```
+
+Restart containers:
+
+```bash
+docker compose restart
+```
+
+Stop containers:
+
+```bash
+docker compose down
+```
+
+---
+
+# 📁 File Upload System
+
+- Asset Agreements are stored in `storage/app/public/agreements`
+- Resource Invoices are stored in `storage/app/public/invoices`
+- File paths are stored in database
+- Access via `storage:link`
+
+---
+
+# 🚀 Production Checklist
+
+- [ ] APP_DEBUG=false
+- [ ] SSL enabled
+- [ ] Docker containers healthy
+- [ ] Database migrated
+- [ ] Storage linked
+- [ ] Nginx config tested
+- [ ] Domain DNS configured
+
+---
+
+# 👨‍💻 Maintainer
+
+Developed and deployed by **Jinhendrix Sore**
+
+---
+
+# 📜 License
+
+Internal proprietary system.
+
