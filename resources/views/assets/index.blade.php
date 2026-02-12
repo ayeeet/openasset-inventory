@@ -60,6 +60,7 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ $sortUrl('status') }}" class="cursor-pointer">Status @if($sortField === 'status'){{ $sortDirection === 'asc' ? '↑' : '↓' }}@endif</a>
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agreement Attachment</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -84,6 +85,13 @@
                                         ">
                                             {{ ucfirst($asset->status) }}
                                         </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        @if($asset->agreement)
+                                            <a href="{{ Storage::url($asset->agreement) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                        @else
+                                            <span class="text-gray-400">None</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         @if(auth()->user()->hasWriteAccess())

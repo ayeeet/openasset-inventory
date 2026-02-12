@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
 {
@@ -67,7 +68,14 @@ class AssetController extends Controller
             'purchase_date' => 'nullable|date',
             'warranty_expiry' => 'nullable|date',
             'notes' => 'nullable|string',
+            'agreement' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
+
+        if ($request->hasFile('agreement')) {
+            $validated['agreement'] = $request->file('agreement')->store('assets/documents', 'public');
+        }
+
+        
 
         $asset = \App\Models\Asset::create($validated);
 
@@ -117,7 +125,17 @@ class AssetController extends Controller
             'purchase_date' => 'nullable|date',
             'warranty_expiry' => 'nullable|date',
             'notes' => 'nullable|string',
+            'agreement' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
+
+        if ($request->hasFile('agreement')) {
+            if ($asset->agreement) {
+                Storage::disk('public')->delete($asset->agreement);
+            }
+            $validated['agreement'] = $request->file('agreement')->store('assets/documents', 'public');
+        }
+
+        
 
         $asset->update($validated);
 
@@ -139,6 +157,10 @@ class AssetController extends Controller
         // Check if admin? Handled in policy normally, but let's check basic role
         if (auth()->user()->role !== 'admin') {
             abort(403);
+        }
+
+        if ($asset->agreement) {
+            Storage::disk('public')->delete($asset->agreement);
         }
 
         $asset->delete();

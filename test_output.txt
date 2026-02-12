@@ -1,0 +1,25 @@
+﻿
+   FAIL  Tests\Feature\AssetDocumentTest
+  Γ¿» can upload agreΓÇª 0.17s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILEΓÇª  LogicException   
+  imagejpeg function is not defined and image cannot be generated.
+
+  at vendor\laravel\framework\src\Illuminate\Http\Testing\FileFactory.php:92
+     88Γûò 
+     89Γûò             if (! function_exists($functionName = "image{$extension}")) {
+     90Γûò                 ob_get_clean();
+     91Γûò 
+  Γ₧£  92Γûò                 throw new LogicException("{$functionName} function is not defined and image cannot be generated.");
+     93Γûò             }
+     94Γûò 
+     95Γûò             call_user_func($functionName, $image);
+     96Γûò
+
+  1   vendor\laravel\framework\src\Illuminate\Http\Testing\FileFactory.php:92
+  2   vendor\laravel\framework\src\Illuminate\Support\helpers.php:388
+
+
+  Tests:    1 failed (0 assertions)
+  Duration: 0.32s
+

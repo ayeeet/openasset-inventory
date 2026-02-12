@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     
-                    <form method="POST" action="{{ route('assets.store') }}">
+                    <form method="POST" action="{{ route('assets.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Name -->
@@ -91,6 +91,15 @@
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
 
+                        <!-- Agreement Attachment -->
+                        <div class="mt-4">
+                            <x-input-label for="agreement" :value="__('AGREEMENT ATTACHMENT')" />
+                            <input id="agreement" name="agreement" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block mt-1 w-full" />
+                            <p class="text-xs text-gray-500 mt-1">Allowed: PDF, DOC, DOCX, JPG, PNG. Max 10MB.</p>
+                            <x-input-error :messages="$errors->get('agreement')" class="mt-2" />
+                        </div>
+
+                        <!-- Invoice removed: feature disabled -->
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('assets.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
                             <x-primary-button>

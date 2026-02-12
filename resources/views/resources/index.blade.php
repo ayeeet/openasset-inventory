@@ -132,7 +132,8 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created By</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Attachment</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added By</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -140,16 +141,30 @@
                                 @forelse($resources as $resource)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ DateTime::createFromFormat('!m', $resource->month)->format('M') }} {{ $resource->year }}
+                                        {{ date('M', mktime(0, 0, 0, $resource->month, 1)) }} {{ $resource->year }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $resource->title }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ $resource->title }}
+                                        @if($resource->description)
+                                            <p class="text-xs text-gray-400 truncate max-w-xs">{{ $resource->description }}</p>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            {{ $resource->type === 'invoice' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                            {{ $resource->type === 'invoice' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800' }}">
                                             {{ ucfirst($resource->type) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><x-currency-amount :amount="$resource->amount" /></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                                        ${{ number_format($resource->amount, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        @if($resource->attachment)
+                                            <a href="{{ Storage::url($resource->attachment) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">View Attachment</a>
+                                        @else
+                                            <span class="text-gray-400">None</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $resource->creator->name ?? 'Unknown' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         @if(auth()->user()->hasWriteAccess())

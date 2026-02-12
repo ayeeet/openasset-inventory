@@ -9,7 +9,7 @@ class Asset extends Model
     protected $fillable = [
         'name', 'serial_number', 'category', 'location_id', 
         'assigned_to_user_id', 'purchase_date', 'warranty_expiry', 
-        'status', 'notes'
+        'status', 'notes', 'agreement'
     ];
 
     protected $casts = [

@@ -17,6 +17,7 @@ class Resource extends Model
         'month',
         'year',
         'created_by',
+        'attachment',
     ];
 
     public function creator()

@@ -6,6 +6,7 @@ use App\Models\Budget;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ResourceController extends Controller
 {
@@ -50,12 +51,17 @@ class ResourceController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min(0)',
+            'amount' => 'required|numeric|min:0',
             'type' => 'required|in:invoice,expense',
-            'month' => 'required|integer|min(1)|max(12)',
-            'year' => 'required|integer|min(2000)|max(2100)',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:2000|max:2100',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
+        
+        if ($request->hasFile('attachment')) {
+            $validated['attachment'] = $request->file('attachment')->store('resources/documents', 'public');
+        }
 
         // Check Budget
         $budget = Budget::where('year', $validated['year'])->first();
@@ -112,12 +118,20 @@ class ResourceController extends Controller
     {
          $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min(0)',
+            'amount' => 'required|numeric|min:0',
             'type' => 'required|in:invoice,expense',
-            'month' => 'required|integer|min(1)|max(12)',
-            'year' => 'required|integer|min(2000)|max(2100)',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:2000|max:2100',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
+
+        if ($request->hasFile('attachment')) {
+            if ($resource->attachment) {
+                Storage::disk('public')->delete($resource->attachment);
+            }
+            $validated['attachment'] = $request->file('attachment')->store('resources/documents', 'public');
+        }
         
         // Similar validation logic re-check difference
          $budget = Budget::where('year', $validated['year'])->first();
@@ -146,6 +160,9 @@ class ResourceController extends Controller
      */
     public function destroy(Resource $resource)
     {
+        if ($resource->attachment) {
+            Storage::disk('public')->delete($resource->attachment);
+        }
         $resource->delete();
         return back()->with('success', 'Entry deleted.');
     }

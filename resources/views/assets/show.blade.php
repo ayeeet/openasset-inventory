@@ -60,6 +60,21 @@
                                     <dd class="mt-1 text-sm text-gray-900">{{ $asset->warranty_expiry?->format('M d, Y') ?? '-' }}</dd>
                                 </div>
                             </dl>
+                            
+                            <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4">Documents</h3>
+                            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                                <div class="sm:col-span-1">
+                                    <dt class="text-sm font-medium text-gray-500">AGREEMENT ATTACHMENT</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        @if($asset->agreement)
+                                            <a href="{{ Storage::url($asset->agreement) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">Download Agreement</a>
+                                        @else
+                                            <span class="text-gray-500">No agreement attached.</span>
+                                        @endif
+                                    </dd>
+                                </div>
+                                <!-- Invoice removed: feature disabled -->
+                            </dl>
                         </div>
                         
                         <div>

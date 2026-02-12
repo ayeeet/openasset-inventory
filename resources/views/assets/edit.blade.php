@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     
-                    <form method="POST" action="{{ route('assets.update', $asset) }}">
+                    <form method="POST" action="{{ route('assets.update', $asset) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -91,6 +91,21 @@
                             <textarea id="notes" name="notes" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('notes', $asset->notes) }}</textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
+
+                        <!-- Agreement Attachment -->
+                        <div class="mt-4">
+                            <x-input-label for="agreement" :value="__('AGREEMENT ATTACHMENT')" />
+                            @if($asset->agreement)
+                                <div class="mb-2">
+                                    <a href="{{ Storage::url($asset->agreement) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">Current Agreement</a>
+                                </div>
+                            @endif
+                            <input id="agreement" name="agreement" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block mt-1 w-full" />
+                            <p class="text-xs text-gray-500 mt-1">Uploading a new file will replace the existing one. Allowed: PDF, DOC, DOCX, JPG, PNG. Max 10MB.</p>
+                            <x-input-error :messages="$errors->get('agreement')" class="mt-2" />
+                        </div>
+
+                        <!-- Invoice removed: feature disabled -->
 
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('assets.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
