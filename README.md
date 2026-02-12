@@ -71,8 +71,8 @@ sudo systemctl enable nginx
 # 📥 2. Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/ayeeet/openasset-inventory.git
+cd openasset-inventory
 ```
 
 ---
