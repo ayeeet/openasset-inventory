@@ -26,7 +26,7 @@ Clone the repository to your web server directory (e.g., `/var/www/open-asset-in
 
 ```bash
 cd /var/www
-git clone https://github.com/yourusername/open-asset-inventory.git
+git clone https://github.com/ayeeet/openasset-inventory.git
 cd open-asset-inventory
 ```
 
