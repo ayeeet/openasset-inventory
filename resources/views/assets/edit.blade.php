@@ -100,7 +100,7 @@
                                     <a href="{{ Storage::url($asset->agreement) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">Current Agreement</a>
                                 </div>
                             @endif
-                            <input id="agreement" name="agreement" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block mt-1 w-full" />
+                            <x-file-input name="agreement" id="agreement" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                             <p class="text-xs text-gray-500 mt-1">Uploading a new file will replace the existing one. Allowed: PDF, DOC, DOCX, JPG, PNG. Max 10MB.</p>
                             <x-input-error :messages="$errors->get('agreement')" class="mt-2" />
                         </div>

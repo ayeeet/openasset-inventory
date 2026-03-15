@@ -74,4 +74,45 @@ class BudgetController extends Controller
         $budget->delete();
         return back()->with('success', 'Budget deleted.');
     }
+
+    public function breakdown($year, $month)
+    {
+        // Must be integer, month between 1 and 12
+        if (!is_numeric($year) || !is_numeric($month) || $month < 1 || $month > 12) {
+            return response()->json(['error' => 'Invalid parameters'], 400);
+        }
+
+        $resources = \App\Models\Resource::where('year', $year)->where('month', $month)->get()->map(function($item) {
+            return [
+                'id' => 'res_' . $item->id,
+                'name' => $item->title . ($item->description ? ' (' . substr($item->description, 0, 30) . '...)' : ''),
+                'type' => 'Resource (' . ucfirst($item->type) . ')',
+                'amount' => (float) $item->amount,
+            ];
+        });
+
+        $infra = \App\Models\InfrastructureCost::where('year', $year)->where('month', $month)->get()->map(function($item) {
+            return [
+                'id' => 'inf_' . $item->id,
+                'name' => $item->service_name,
+                'type' => 'Infrastructure',
+                'amount' => (float) $item->amount,
+            ];
+        });
+
+        $combined = $resources->concat($infra)->sortByDesc('amount')->values();
+        $total = $combined->sum('amount');
+        
+        $combined = $combined->map(function($item) use ($total) {
+            $item['percentage'] = $total > 0 ? round(($item['amount'] / $total) * 100, 1) : 0;
+            return $item;
+        });
+
+        return response()->json([
+            'year' => (int) $year,
+            'month' => (int) $month,
+            'total' => $total,
+            'breakdown' => $combined
+        ]);
+    }
 }

@@ -84,10 +84,10 @@
                 </div>
             </div>
             
-            <!-- Monthly Breakdown (Simulated Chart/Table) -->
-             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <!-- Monthly Breakdown (Interactive Chart/Table) -->
+             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6" x-data="budgetBreakdown({{ $year }})">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Monthly Spending</h3>
+                    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Monthly Spending Breakdown</h3>
                     <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
                         @for($i = 1; $i <= 12; $i++)
                             @php 
@@ -95,14 +95,136 @@
                                 $monthName = DateTime::createFromFormat('!m', $i)->format('M');
                                 $isOver = $spent > $budget->monthly_budget;
                             @endphp
-                            <div class="text-center p-2 border rounded {{ $isOver ? 'bg-red-50 border-red-200' : 'bg-gray-50' }}">
-                                <div class="text-xs font-bold text-gray-500">{{ $monthName }}</div>
-                                <div class="text-sm font-semibold {{ $isOver ? 'text-red-600' : 'text-gray-800' }}"><x-currency-amount :amount="$spent" :decimals="0" /></div>
+                            <div @click="openModal({{ $i }}, '{{ $monthName }}')" class="cursor-pointer transition-transform hover:scale-105 text-center p-2 border rounded shadow-sm {{ $isOver ? 'bg-red-50 border-red-300 ring-1 ring-red-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100' }}" title="Click to view details">
+                                <div class="text-xs font-bold {{ $isOver ? 'text-red-700' : 'text-gray-500' }}">{{ $monthName }}</div>
+                                <div class="text-sm font-semibold {{ $isOver ? 'text-red-700' : 'text-gray-800' }}"><x-currency-amount :amount="$spent" :decimals="0" /></div>
                             </div>
                         @endfor
                     </div>
-                     <div class="mt-2 text-xs text-gray-500 text-right">Monthly Budget Limit: <x-currency-amount :amount="$budget->monthly_budget" /></div>
+                     <div class="mt-2 text-xs text-gray-500 flex justify-between">
+                         <span>Click any month card to see a detailed cost breakdown.</span>
+                         <span>Monthly Budget Limit: <span class="font-bold text-gray-800"><x-currency-amount :amount="$budget->monthly_budget" /></span></span>
+                     </div>
                 </div>
+
+                <!-- Breakdown Modal -->
+                <div x-show="isOpen" style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    
+                    <div x-show="isOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <div x-show="isOpen" x-transition.opacity @click.away="isOpen = false" class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 border-b">
+                                    <div class="sm:flex sm:items-start">
+                                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                                            <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">
+                                                Spending Breakdown for <span x-text="selectedMonthName"></span> <span x-text="year"></span>
+                                            </h3>
+                                            <div class="mt-2">
+                                                
+                                                <div x-show="isLoading" class="flex justify-center py-8">
+                                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    <span class="text-gray-600">Loading breakdown...</span>
+                                                </div>
+
+                                                <div x-show="!isLoading && breakdownData.length === 0" class="text-center py-8 text-gray-500">
+                                                    No expenses recorded for this month.
+                                                </div>
+
+                                                <div x-show="!isLoading && breakdownData.length > 0" class="mt-4">
+                                                    <table class="min-w-full divide-y divide-gray-200">
+                                                        <thead class="bg-gray-50">
+                                                            <tr>
+                                                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                                                <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                                                <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% of Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="bg-white divide-y divide-gray-200">
+                                                            <template x-for="item in breakdownData" :key="item.id">
+                                                                <tr>
+                                                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900" x-text="item.name"></td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                                        <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" 
+                                                                            :class="item.type === 'Infrastructure' ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20' : 'bg-gray-50 text-gray-600 ring-gray-500/10'"
+                                                                            x-text="item.type"></span>
+                                                                    </td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold text-right" x-text="formatCurrency(item.amount)"></td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 text-right">
+                                                                        <div class="flex items-center justify-end">
+                                                                            <span class="w-8 inline-block text-right" x-text="item.percentage + '%'"></span>
+                                                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 overflow-hidden">
+                                                                               <div class="bg-indigo-600 h-1.5 rounded-full" :style="'width: ' + item.percentage + '%'"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </template>
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr class="bg-gray-50 font-bold">
+                                                                <td colspan="2" class="px-3 py-3 text-right text-sm text-gray-900">Total:</td>
+                                                                <td class="px-3 py-3 text-right text-sm text-indigo-700" x-text="formatCurrency(totalAmount)"></td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                    <button type="button" @click="isOpen = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function budgetBreakdown(year) {
+                        return {
+                            isOpen: false,
+                            isLoading: false,
+                            year: year,
+                            selectedMonth: null,
+                            selectedMonthName: '',
+                            breakdownData: [],
+                            totalAmount: 0,
+                            openModal(month, monthName) {
+                                this.selectedMonth = month;
+                                this.selectedMonthName = monthName;
+                                this.isOpen = true;
+                                this.fetchData();
+                            },
+                            fetchData() {
+                                this.isLoading = true;
+                                this.breakdownData = [];
+                                fetch(`/api/budgets/${this.year}/months/${this.selectedMonth}/breakdown`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.breakdownData = data.breakdown || [];
+                                        this.totalAmount = data.total || 0;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error('Error fetching breakdown', err);
+                                        this.isLoading = false;
+                                    });
+                            },
+                            formatCurrency(amount) {
+                                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+                            }
+                        }
+                    }
+                </script>
             </div>
             @else
              <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">

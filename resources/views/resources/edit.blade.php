@@ -45,7 +45,7 @@
                     <a href="{{ Storage::url($resource->attachment) }}" target="_blank" class="text-indigo-600 hover:underline">View Current Attachment</a>
                 </div>
             @endif
-            <input type="file" name="attachment" id="attachment" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+            <x-file-input name="attachment" id="attachment" />
             <x-input-error :messages="$errors->get('attachment')" class="mt-2" />
         </div>
                          <div class="grid grid-cols-2 gap-4 mt-4">

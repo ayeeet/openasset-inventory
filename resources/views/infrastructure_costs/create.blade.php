@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Add Expense/Invoice') }}
+            {{ __('Add Infrastructure Cost') }}
         </h2>
     </x-slot>
 
@@ -10,14 +10,21 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     
-                    <form method="POST" action="{{ route('resources.store') }}">
+                    <form method="POST" action="{{ route('infrastructure-costs.store') }}">
                         @csrf
 
-                        <!-- Title -->
+                        <!-- Service Name -->
                         <div>
-                            <x-input-label for="title" :value="__('Title')" />
-                            <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title')" required autofocus />
-                            <x-input-error :messages="$errors->get('title')" class="mt-2" />
+                            <x-input-label for="service_name" :value="__('Service/Resource Name')" />
+                            <x-text-input id="service_name" class="block mt-1 w-full" type="text" name="service_name" :value="old('service_name')" required autofocus placeholder="e.g. AWS EC2, Cloudflare, Azure Storage" />
+                            <x-input-error :messages="$errors->get('service_name')" class="mt-2" />
+                        </div>
+
+                         <!-- Category -->
+                         <div class="mt-4">
+                            <x-input-label for="category" :value="__('Category')" />
+                            <x-text-input id="category" class="block mt-1 w-full" type="text" name="category" :value="old('category')" placeholder="e.g. Cloud, Storage, Networking" />
+                            <x-input-error :messages="$errors->get('category')" class="mt-2" />
                         </div>
 
                          <!-- Amount -->
@@ -25,23 +32,6 @@
                             <x-input-label for="amount" :value="__('Amount')" />
                             <x-text-input id="amount" class="block mt-1 w-full" type="number" step="0.01" name="amount" :value="old('amount')" required />
                             <x-input-error :messages="$errors->get('amount')" class="mt-2" />
-                        </div>
-
-                         <!-- Type -->
-                        <div class="mt-4">
-                            <x-input-label for="type" :value="__('Type')" />
-                            <select id="type" name="type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="expense" {{ old('type') == 'expense' ? 'selected' : '' }}>Expense</option>
-                                <option value="invoice" {{ old('type') == 'invoice' ? 'selected' : '' }}>Invoice</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('type')" class="mt-2" />
-                        </div>
-
-                        <!-- Invoice Attachment -->
-                        <div class="mt-4">
-                            <x-input-label for="attachment" :value="__('Invoice Attachment')" />
-                            <x-file-input name="attachment" id="attachment" />
-                            <x-input-error :messages="$errors->get('attachment')" class="mt-2" />
                         </div>
 
                          <div class="grid grid-cols-2 gap-4 mt-4">
@@ -68,13 +58,13 @@
 
                         <!-- Description -->
                         <div class="mt-4">
-                            <x-input-label for="description" :value="__('Description')" />
+                            <x-input-label for="description" :value="__('Description / Notes')" />
                             <textarea id="description" name="description" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('description') }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('resources.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
+                            <a href="{{ route('infrastructure-costs.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
                             <x-primary-button>
                                 {{ __('Add Entry') }}
                             </x-primary-button>

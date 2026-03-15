@@ -58,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
         
         Route::resource('resources', \App\Http\Controllers\ResourceController::class)->middleware(['module:resources', 'module.write']);
         Route::resource('budgets', \App\Http\Controllers\BudgetController::class)->middleware(['module:resources', 'module.write']);
+        Route::get('/api/budgets/{year}/months/{month}/breakdown', [\App\Http\Controllers\BudgetController::class, 'breakdown'])->name('api.budgets.breakdown')->middleware('module:resources');
+        Route::resource('infrastructure-costs', \App\Http\Controllers\InfrastructureCostController::class)->middleware(['module:resources', 'module.write']);
     });
     
     // Admin routes only

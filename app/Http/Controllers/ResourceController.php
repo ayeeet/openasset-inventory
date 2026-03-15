@@ -25,13 +25,24 @@ class ResourceController extends Controller
             
         $budget = Budget::where('year', $year)->first();
         
-        $totalSpent = Resource::where('year', $year)->sum('amount');
+        $totalSpent = Resource::where('year', $year)->sum('amount') + \App\Models\InfrastructureCost::where('year', $year)->sum('amount');
         
-        $monthlySpent = Resource::where('year', $year)
+        $monthlySpentResources = Resource::where('year', $year)
             ->select('month', DB::raw('sum(amount) as total'))
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
+            
+        $monthlySpentInfra = \App\Models\InfrastructureCost::where('year', $year)
+            ->select('month', DB::raw('sum(amount) as total'))
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+            
+        $monthlySpent = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlySpent[$i] = ($monthlySpentResources[$i] ?? 0) + ($monthlySpentInfra[$i] ?? 0);
+        }
 
         return view('resources.index', compact('resources', 'budget', 'year', 'totalSpent', 'monthlySpent'));
     }

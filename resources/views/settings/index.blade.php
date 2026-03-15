@@ -45,7 +45,7 @@
                                 @else
                                     <div id="current-logo-preview" class="mt-2 mb-2 hidden"></div>
                                 @endif
-                                <input id="app_logo" type="file" name="app_logo" accept="image/*" class="block mt-1 w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                <x-file-input id="app_logo" name="app_logo" accept="image/*" />
                                 <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (MAX. 10MB). You may crop the image before uploading.</p>
 
                                 <!-- Cropping modal -->
